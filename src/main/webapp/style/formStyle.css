@@ -1,0 +1,30 @@
+.block ul {
+    width:750px;
+    list-style-type:none;
+    list-style-position:outside;
+    margin:0px;
+    padding:0px;
+}
+.block li{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    position:relative;
+}
+
+.block li:first-child, .block li:last-child {
+    border-bottom:1px solid #777;
+}
+
+.block label {
+    width:200px;
+    /*margin-top: 3px;*/
+    display:inline-block;
+    float:left;
+    /*padding:3px;*/
+}
+.block input {
+    height:20px;
+    width:300px;
+    padding:5px 8px;
+}
+
