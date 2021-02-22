@@ -1,0 +1,17 @@
+
+X	java:S125b"<This block of commented-out lines of code should be removed.(ÜğÓ÷8¿æÒøû.
+
+java:S1488a"_Immediately return this expression instead of assigning it to the temporary variable "reports".(ø·ó‡úÿÿÿÿ8¿æÒøû.
+j
+java:S2095˜"GUse try-with-resources or close this "Statement" in a "finally" clause.(õ½ÛØşÿÿÿÿ8Øô‡ôû.
+q
+java:S2095,"OUse try-with-resources or close this "PreparedStatement" in a "finally" clause.(¡ÂªÑûÿÿÿÿ8Ö…æşû.
+h	java:S112Ä"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8Øô‡ôû.
+U
+java:S1068"3Remove this unused "SQL_REPORT_DATA" private field.(áÒìûÿÿÿÿ8¿æÒøû.
+l
+java:S2095B"OUse try-with-resources or close this "PreparedStatement" in a "finally" clause.(İ£¥ü8Øô‡ôû.
+T
+java:S1135"2Complete the task associated to this TODO comment.(¥Ü‡£üÿÿÿÿ8Øô‡ôû.
+r
+java:S2095…"OUse try-with-resources or close this "PreparedStatement" in a "finally" clause.(¦–ØÄøÿÿÿÿ8Øô‡ôû.

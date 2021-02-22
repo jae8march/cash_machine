@@ -1,0 +1,11 @@
+
+D
+java:S1068"'Remove this unused "LOG" private field.(ğ©¦è8ÓËïøû.
+P
+java:S1948".Make "checkService" transient or serializable.(íÂİòùÿÿÿÿ8ÓËïøû.
+M
+java:S1948"0Make "productService" transient or serializable.(ô‚îŸ8ÓËïøû.
+Q
+java:S1172b"/Remove this unused method parameter "response".(Ê˜ÔÌıÿÿÿÿ8å˜îùû.
+L
+java:S1172U"/Remove this unused method parameter "response".(¬º÷­8Œõçùû.

@@ -1,0 +1,12 @@
+
+Z
+java:S1128"=Remove this unused import 'com.company.app.dao.entity.Check'.(ê³µ»8çĞ¸òû.
+q
+java:S2095#"OUse try-with-resources or close this "PreparedStatement" in a "finally" clause.(À­ñÂùÿÿÿÿ8½²òû.
+o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(ÒÇ…Æ
+M
+java:S1128"0Remove this unused import 'java.util.ArrayList'.(÷‰îƒ8Å‘»òû.
+M
+java:S1128"+Remove this unused import 'java.util.List'.(Õë±Äøÿÿÿÿ8Å‘»òû.
+T
+java:S1135"2Complete the task associated to this TODO comment.(¥Ü‡£üÿÿÿÿ8‘ìÈû.

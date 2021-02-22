@@ -1,0 +1,9 @@
+
+Q
+java:S1948"/Make "reportService" transient or serializable.(åî– ûÿÿÿÿ8‚œ”öû.
+U
+java:S1854"8Remove this useless assignment to local variable "data".(üÍÏ®8ºªöû.
+S
+java:S1068"1Remove this unused "reportService" private field.(åî– ûÿÿÿÿ8Æû”öû.
+F
+java:S1481")Remove this unused "data" local variable.(üÍÏ®8ºªöû.

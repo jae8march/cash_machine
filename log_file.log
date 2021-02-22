@@ -1,0 +1,7 @@
+14-02-2021 00:03:01 ERROR ConnectionPool.getDataSource, line 40 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:03:24 ERROR ConnectionPool.getDataSource, line 40 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:04:26 ERROR ConnectionPool.getDataSource, line 42 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:08:22 ERROR ConnectionPool.getDataSource, line 40 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:08:45 ERROR ConnectionPool.getDataSource, line 40 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:20:10 ERROR ConnectionPool.getDataSource, line 42 -> java.lang.NumberFormatException: For input string: "100;"
+14-02-2021 00:22:41 ERROR ConnectionPool.getDataSource, line 42 -> java.lang.NumberFormatException: For input string: "100;"

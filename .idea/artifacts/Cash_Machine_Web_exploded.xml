@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Cash_Machine:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/Cash_Machine_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="Cash_Machine/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="Cash_Machine" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -1,0 +1,7 @@
+
+i
+java:S1128"LRemove this unused import 'com.company.app.util.exception.ProjectException'.(®áÙ’8Í³­ôû.
+g	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(ï’×¤üÿÿÿÿ8„ï©û.
+T
+java:S1135"2Complete the task associated to this TODO comment.(¥Ü‡£üÿÿÿÿ8Í³­ôû.
+Q	java:S125"<This block of commented-out lines of code should be removed.(¤¾¦ì

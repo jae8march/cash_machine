@@ -1,0 +1,15 @@
+
+F
+java:S1948"0Make "productService" transient or serializable.(³’é…
+6
+java:S1170"!Make this final field static too.(‘‚‚k
+]	java:S125W"<This block of commented-out lines of code should be removed.(ñ¥ùšøÿÿÿÿ8åþåôû.
+k	java:S116"WRename this field "ROWS_ON_PAGE" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(‘‚‚k
+<
+java:S1659"&Declare "lastPage" on a separate line.(³Âåè
+<
+java:S1659"&Declare "nextPage" on a separate line.(³Âåè
+H
+java:S1659"+Declare "productAmount" on a separate line.(³Âåè8Úü°ôû.
+M
+java:S1135"2Complete the task associated to this TODO comment.(¥Ü‡£üÿÿÿÿ
