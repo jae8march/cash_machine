@@ -2,14 +2,11 @@
 <%@ taglib prefix="tlds" uri="/WEB-INF/tlds/taglib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ page isELIgnored="false" %>
-<%@ page session="true" %>
 
-<fmt:setLocale value="${cookie['lang'].value}"/>
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
-<html lang="${cookie['lang'].value}">
+<html>
 <head>
     <title><fmt:message key="main.title" bundle="${title}"/></title>
 </head>
