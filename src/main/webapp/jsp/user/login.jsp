@@ -2,15 +2,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%@ page isELIgnored="false" %>
-<%@ page session="true" %>
 
-<fmt:setLocale value="${cookie['lang'].value}"/>
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
 <fmt:setBundle basename="errors" var="errors"/>
-<html lang="${cookie['lang'].value}">
+<html>
 <head>
     <title><fmt:message key="login.title" bundle="${title}"/></title>
 </head>
