@@ -26,9 +26,6 @@
         </ul>
         <ul class="menur">
             <li>
-<%--                <a href="${pageContext.request.contextPath}/api?action=language?en">--%>
-<%--                    <fmt:message key="lang.en" bundle="${buttons}"/>--%>
-<%--                </a>--%>
                 <a href="?cookieLocale=en">
                     <fmt:message key="lang.en" bundle="${buttons}"/>
                 </a>
