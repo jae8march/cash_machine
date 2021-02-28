@@ -1,13 +1,37 @@
 package com.company.app.dao.interfaceDao;
-//TODO WORK
+
 import com.company.app.dao.connection.FactoryDAO;
-import com.company.app.dao.entity.Check;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Interface for DAO.
+ * @param <T>
+ */
 public interface IDAO<T> extends AutoCloseable{
+    /**
+     * Method for counting rows in a table.
+     * @param sql
+     * @return
+     */
+    default long getCountSql(String sql){
+        Connection connection = FactoryDAO.getConnection();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)){
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getLong("count");
+            }
+
+            rs.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            return -1;
+        }
+        return 0;
+    }
+
     /**
      * Adds row in table if input entity is not already exist.
      * @param entity
@@ -28,25 +52,6 @@ public interface IDAO<T> extends AutoCloseable{
      * @return true if row was deleted
      */
     boolean deleteObject(long id);
-
-    default long getCountSql(String sql){
-        Connection connection = FactoryDAO.getConnection();
-        try {
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getLong("count");
-            }
-            close(stmt);
-            close(rs);
-            connection.close();
-
-            return 0;
-        } catch (SQLException e) {
-            return -1;
-        }
-    }
 
     /**
      * Set data to the entity.

@@ -1,15 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%--<%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>--%>
-<c:choose>
-    <c:when test="${locale == 'ru'}">
-        <fmt:setLocale value="ru"/>
-    </c:when>
-    <c:otherwise>
-        <fmt:setLocale value="en"/>
-    </c:otherwise>
-</c:choose>
+
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
@@ -41,7 +33,7 @@
                         <div class="error"><fmt:message key="error.product" bundle="${errors}"/></div>
                     </c:if>
 
-                    <form class="block" action="${pageContext.request.contextPath}/api?action=manager/addProduct" method="post" name="newProductForm">
+                    <form class="block" action="${pageContext.request.contextPath}/api?action=addProduct" method="post" name="newProductForm">
                         <ul>
                             <li>
                                 <h1><fmt:message key="user.manager.product.new.h1" bundle="${title}"/></h1>
@@ -97,8 +89,8 @@
                                 <label for="weightSold"><fmt:message key="user.manager.product.new.form.sold" bundle="${inscription}"/> </label>
 
                                 <select size="1" name="weightSold" id="weightSold">
-                                    <option name="no"><fmt:message key="user.manager.product.new.form.sold.no" bundle="${inscription}"/></option>
-                                    <option name="yes"><fmt:message key="user.manager.product.new.form.sold.yes" bundle="${inscription}"/></option>
+                                    <option value="no"><fmt:message key="user.manager.product.new.form.sold.no" bundle="${inscription}"/></option>
+                                    <option value="yes"><fmt:message key="user.manager.product.new.form.sold.yes" bundle="${inscription}"/></option>
                                 </select>
                                 <c:if test="${not empty requestScope.how_sold_weight_error_message}">
                                     <div class="error"><fmt:message key="error.sold.weight" bundle="${errors}"/></div>
@@ -108,12 +100,12 @@
                                 </c:if>
                             </li>
                             <li>
-                                    <button type="submit" name="submit"><fmt:message key="button.manager.product.new" bundle="${buttons}"/></button>
-
+                                    <button type="submit" name="submit">
+                                        <fmt:message key="button.manager.product.new" bundle="${buttons}"/>
+                                    </button>
                             </li>
                         </ul>
                     </form>
-
             </div>
         </div>
         </div>

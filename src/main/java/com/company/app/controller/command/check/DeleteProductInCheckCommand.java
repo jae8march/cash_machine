@@ -1,18 +1,20 @@
 package com.company.app.controller.command.check;
 
 import com.company.app.controller.command.ICommand;
+import com.company.app.dao.entity.Check;
 import com.company.app.dao.entity.Product;
+import com.company.app.dao.entity.User;
+import com.company.app.dao.entity.enumeration.UserRole;
 import com.company.app.service.impl.CheckService;
 import com.company.app.service.impl.ProductService;
 import com.company.app.util.constant.Path;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class DeleteProductInCheckCommand implements ICommand {
-    CheckService checkService;
-    ProductService productService;
+    private final CheckService checkService;
+    private final ProductService productService;
 
     public DeleteProductInCheckCommand(CheckService checkService, ProductService productService) {
         this.checkService = checkService;
@@ -20,27 +22,31 @@ public class DeleteProductInCheckCommand implements ICommand {
     }
 
     @Override
-    public String execute(HttpServletRequest request, HttpServletResponse response) {
+    public void execute(HttpServletRequest request, HttpServletResponse response) {
+        User user = (User) request.getSession().getAttribute("user");
         long code = Long.parseLong(request.getParameter("deleteCode"));
         long id = Long.parseLong(request.getParameter("deleteFromCheckId"));
 
+        if(!user.getUserRole().equals(UserRole.CHIEF_CASHIER)){
+            request.setAttribute("check_status_access", "error");
+            DetailsCheckCommand list = new DetailsCheckCommand(checkService);
+            list.execute(request, response);
+            return;
+        }
         Product product = productService.getProductById(code);
         Product productInCheck = checkService.getProductById(id, code);
 
         product.setQuantity(product.getQuantity()+productInCheck.getQuantity());
-        product.setWeight((double) Math.round((product.getWeight()+productInCheck.getWeight()) * 100) / 100);
+        double round = (double) Math.round((product.getWeight()+productInCheck.getWeight()) * 1000) / 1000;
+        product.setWeight(round);
+
+        Check check = checkService.getById(id);
+        check.setCheckPrice((double) Math.round((check.getCheckPrice()-productInCheck.getPrice()) * 1000) / 1000);
+        checkService.update(check);
+
         productService.update(product);
-        checkService.deleteProductInCheck(code);
+        checkService.delete(code);
 
-        DetailsCheckCommand check = new DetailsCheckCommand(checkService);
-        check.execute(request, response);
-
-        request.setAttribute("checkId", code);
-        try {
-            response.sendRedirect(request.getContextPath() + Path.DETAILS_CHECK);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Path.DETAILS_CHECK;
+        redirect(request, response, Path.C_DETAILS_CHECK);
     }
 }

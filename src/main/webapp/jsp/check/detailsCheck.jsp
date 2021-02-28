@@ -2,15 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%--<%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>--%>
-<c:choose>
-    <c:when test="${locale == 'ru'}">
-        <fmt:setLocale value="ru"/>
-    </c:when>
-    <c:otherwise>
-        <fmt:setLocale value="en"/>
-    </c:otherwise>
-</c:choose>
+
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
@@ -19,7 +11,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Check ${check.checkId}</title>
+    <title><fmt:message key="user.cashier.check.title" bundle="${title}"/> ${check.checkId}</title>
 </head>
 <style>
     <%@include file='../../style/main.css' %>
@@ -38,34 +30,68 @@
 <br>
 
 <div class="leftNav">
-    <p>Check id: ${check.checkId};<br>
-        Cashier: ${loginUser};<br>
-        Status: ${check.checkStatus};<br>
-        Date: ${date};<br>
-        Total price: ${check.checkPrice};</p><br>
-    <form name="close" action="${pageContext.request.contextPath}/api?action=check/changeStatus" method="post">
-        <input type="hidden" name="status" value="CLOSED">
-        <button name = "changeStatusId" value="${check.checkId}" type="submit"><fmt:message key="button.navigation.check.closed" bundle="${buttons}"/></button>
-    </form>
-    <form name="cancel" action="${pageContext.request.contextPath}/api?action=check/changeStatus" method="post">
-        <input type="hidden" name="status" value="CANCELLED">
-        <button name="changeStatusId" value="${check.checkId}" type="submit"><fmt:message key="button.navigation.check.cancel" bundle="${buttons}"/></button>
-    </form>
+    <p><fmt:message key="user.cashier.detail.check.id" bundle="${inscription}"/>: ${check.checkId};<br>
+        <fmt:message key="user.cashier.detail.check.login" bundle="${inscription}"/>: ${loginUser};<br>
+        <fmt:message key="user.cashier.detail.check.status" bundle="${inscription}"/>: <tags:status check_status="${check.checkStatus}"/>;<br>
+        <fmt:message key="user.cashier.detail.check.date" bundle="${inscription}"/>: ${date};<br>
+        <fmt:message key="user.cashier.detail.check.price" bundle="${inscription}"/>: <fmt:formatNumber type="number" maxFractionDigits="2" minFractionDigits="2" value="${check.checkPrice}"/>;</p><br>
 
-    <form action="${pageContext.request.contextPath}/api?action=check/listCheck" method="post">
+    <form name="close" action="${pageContext.request.contextPath}/api?action=changeStatus" method="post">
+        <input type="hidden" name="status" value="CLOSED">
+        <button class="inside" name = "changeStatusId" value="${check.checkId}" type="submit">
+            <fmt:message key="button.navigation.check.closed" bundle="${buttons}"/>
+        </button>
+    </form>
+    <form name="cancel" action="${pageContext.request.contextPath}/api?action=changeStatus" method="post">
+        <input type="hidden" name="status" value="CANCELLED">
+        <button class="inside" name="changeStatusId" value="${check.checkId}" type="submit">
+            <fmt:message key="button.navigation.check.cancel" bundle="${buttons}"/>
+        </button>
+    </form>
+    <br>
+    <form action="${pageContext.request.contextPath}/api?action=detailsCheck" method="post">
         <c:if test="${page > 1}">
             <button class="inside"  type="submit" name="nextPage" value='previous'>
-                « Previous
+                « <fmt:message key="button.navigation.previous" bundle="${table}"/>
             </button>
         </c:if>
         <c:if test="${page < lastPage}">
             <button class="inside"  type="submit" name="nextPage" value='next'>
-                Next »
+                <fmt:message key="button.navigation.next" bundle="${table}"/> »
             </button>
         </c:if>
         <input type="hidden" name = "page" value="${page}">
-        <input type="hidden" name = "sort" value="${sort}">
     </form>
+    <c:if test="${not empty requestScope.check_status_not_created}">
+        <div class="error"><fmt:message key="error.add.product.check.status.not.created" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.code_not_int}">
+        <div class="error"><fmt:message key="error.int.code" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.product_not_exist}">
+        <div class="error"><fmt:message key="error.product.check" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.product_exist_check}">
+        <div class="error"><fmt:message key="error.add.product.exist.check" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.weight_number_error_message}">
+        <div class="error"><fmt:message key="error.number.weight" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.quantity_error_message}">
+        <div class="error"><fmt:message key="error.int.quantity" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.table_error_message}">
+        <div class="error"><fmt:message key="error.add.product.check" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.check_closed}">
+        <div class="error"><fmt:message key="error.check.closed" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.check_cancelled}">
+        <div class="error"><fmt:message key="error.check.cancelled" bundle="${errors}"/></div>
+    </c:if>
+    <c:if test="${not empty requestScope.check_status_access}">
+        <div class="error"><fmt:message key="error.h1" bundle="${title}"/></div>
+    </c:if>
 </div>
 
 <table>
@@ -81,34 +107,38 @@
         <tr>
             <td><c:out value="${product.code}"/></td>
             <td><c:out value="${product.name}"/></td>
-            <td><c:out value="${product.price}"/></td>
+            <td><fmt:formatNumber type="number" maxFractionDigits="2" value="${product.price}"/></td>
             <td><c:out value="${product.quantity}"/></td>
-            <td><c:out value="${product.weight}"/></td>
+            <td><fmt:formatNumber type="number" maxFractionDigits="2" value="${product.weight}"/></td>
             <td><c:out value="${product.weightSold}"/></td>
             <td>
-                <form name="deleteProduct" action="${pageContext.request.contextPath}/api?action=chiefCashier/deleteFromCheck" method="post">
+                <form name="deleteFromCheck" action="${pageContext.request.contextPath}/api?action=deleteFromCheck" method="post">
                     <input type="hidden" name="deleteFromCheckId" value="${check.checkId}">
-                    <button name = "deleteCode" value="${product.code}" class="inside" type="submit">Delete</button>
+                    <button name = "deleteCode" value="${product.code}" class="inside" type="submit">
+                        <fmt:message key="button.table.delete" bundle="${buttons}"/>
+                    </button>
                 </form>
             </td>
         </tr>
     </c:forEach>
 </table>
-
 <div class="formForAdd">
-    <form name="addInCheck" action="${pageContext.request.contextPath}/api?action=cashier/addInCheck" method="post">
+    <form name="addInCheck" action="${pageContext.request.contextPath}/api?action=addInCheck" method="post">
         <select size="1" name="addBy" id="addBy">
             <option value="productCode" ><fmt:message key="table.sort.code" bundle="${table}"/></option>
             <option value="productName" ><fmt:message key="table.sort.name" bundle="${table}"/></option>
         </select>
         <input type="text" name="designation" id="designation">
 <br>
-        <label for="howMany">How many?</label>
+        <label for="howMany">
+            <fmt:message key="button.check.add.many" bundle="${buttons}"/>?
+        </label>
         <input type="text" name="howMany" id="howMany">
 
-        <button name="addProductInCheck" value="${check.checkId}" type="submit">Add product</button>
+        <button name="addProductInCheck" value="${check.checkId}" type="submit">
+            <fmt:message key="button.navigation.product.add" bundle="${buttons}"/>
+        </button>
     </form>
 </div>
-
 </body>
 </html>

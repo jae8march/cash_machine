@@ -1,7 +1,11 @@
 package com.company.app.controller.command.check;
 
 import com.company.app.controller.command.ICommand;
+import com.company.app.dao.entity.Check;
 import com.company.app.dao.entity.Product;
+import com.company.app.dao.entity.User;
+import com.company.app.dao.entity.enumeration.CheckStatus;
+import com.company.app.dao.entity.enumeration.UserRole;
 import com.company.app.service.impl.CheckService;
 import com.company.app.service.impl.ProductService;
 import com.company.app.util.constant.Path;
@@ -9,47 +13,63 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 public class ChangeStatusCheckCommand implements ICommand {
     private static final Logger LOG = Logger.getLogger(ChangeStatusCheckCommand.class);
-    CheckService checkService;
-    ProductService productService;
+    private final CheckService checkService;
+    private final ProductService productService;
 
-    public ChangeStatusCheckCommand(CheckService checkService) {
+    public ChangeStatusCheckCommand(CheckService checkService, ProductService productService) {
         this.checkService = checkService;
+        this.productService = productService;
     }
-
+    /**
+     * Changes check status. If the check has the status "cancelled", it cannot be changed.
+     * @param request request to read the command from
+     * @param response
+     */
     @Override
-    public String execute(HttpServletRequest request, HttpServletResponse response) {
+    public void execute(HttpServletRequest request, HttpServletResponse response) {
+        final String error = "error";
+        User user = (User) request.getSession().getAttribute("user");
         long id = Long.parseLong(request.getParameter("changeStatusId"));
         String status = request.getParameter("status");
 
-        if(status.equals("CLOSED")){
-            if(checkService.changeStatusCheck(id, "CLOSED")){
-                LOG.info("Close successful for check " + id);
-            }else {
-                LOG.info("Close unsuccessful for check " + id);
-            }
-            ListCheckCommand check = new ListCheckCommand(checkService);
-            check.execute(request, response);
+        Check check = checkService.getById(id);
 
-            try {
-                response.sendRedirect(request.getContextPath() + Path.ALL_CHECKS);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if(status.equalsIgnoreCase("CLOSED")&& user.getUserRole().equals(UserRole.CASHIER)){
+            if(check.getCheckStatus().equals(CheckStatus.CLOSED)){
+                LOG.info("Close unsuccessful for check " + id);
+                request.setAttribute("check_closed", error);
+                DetailsCheckCommand checkCommand = new DetailsCheckCommand(checkService);
+                checkCommand.execute(request, response);
+                return;
+            } else {
+                checkService.changeStatusCheck(id, "CLOSED");
+                DetailsCheckCommand checkCommand = new DetailsCheckCommand(checkService);
+                checkCommand.execute(request, response);
+                return;
             }
-            return Path.ALL_CHECKS;
+        } else if(status.equalsIgnoreCase("CANCELLED")&& user.getUserRole().equals(UserRole.CHIEF_CASHIER)){
+            if(check.getCheckStatus().equals(CheckStatus.CANCELLED)){
+                LOG.info("Cancelled unsuccessful for product " + id);
+                request.setAttribute("check_cancelled", error);
+                DetailsCheckCommand checkCommand = new DetailsCheckCommand(checkService);
+                checkCommand.execute(request, response);
+                return;
+            } else {
+                checkService.changeStatusCheck(id, "CANCELLED");
+            }
+        } else {
+            request.setAttribute("check_status_access", error);
+            DetailsCheckCommand checkCommand = new DetailsCheckCommand(checkService);
+            checkCommand.execute(request, response);
+            return;
         }
         List<Product> productList = checkService.getAllProductInCheck(id);
         Product product;
 
-        if(checkService.changeStatusCheck(id, "CANCELLED")){//устанавливает статус "отменен"
-            LOG.info("Cancelled successful for product " + id);
-        }else {
-            LOG.info("Cancelled unsuccessful for product " + id);
-        }
         for (Product p : productList){
             product = productService.getProductById(p.getCode());
             product.setQuantity(product.getQuantity()+p.getQuantity());
@@ -59,15 +79,6 @@ public class ChangeStatusCheckCommand implements ICommand {
             }
         }
 
-        ListCheckCommand check = new ListCheckCommand(checkService);
-        check.execute(request, response);
-
-        try {
-            response.sendRedirect(request.getContextPath() + Path.ALL_CHECKS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Path.ALL_CHECKS;
-
+        redirect(request, response, Path.C_LIST_CHECK);
     }
 }

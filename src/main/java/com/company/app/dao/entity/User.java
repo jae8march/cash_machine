@@ -14,13 +14,16 @@ public class User implements Serializable {
     private long id;
     private String name;
     private String surname;
-    private String login;
-    private String password;
+    private transient String login;
+    private transient String password;
     private UserRole userRole;
 
     public User() {
     }
 
+    public User(String login) {
+        this.login = login;
+    }
     public User(String login, String password) {
         this.login = login;
         this.password = password;

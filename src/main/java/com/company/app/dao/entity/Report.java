@@ -15,15 +15,15 @@ public class Report implements Serializable {
     private long id;
     private ReportType reportType;
     private Timestamp date;
-    private double beforeCash;
-    private double nowCash;
-    private double totalCash;
+    private transient double beforeCash;
+    private transient double nowCash;
+    private transient double totalCash;
 
     public Report() {
     }
 
-    public Report(long id, ReportType reportType, Timestamp date,
-                  double beforeCash, double nowCash, double totalCash) {
+    public Report(long id, ReportType reportType, Timestamp date, double beforeCash,
+                  double nowCash, double totalCash) {
         this.id = id;
         this.reportType = reportType;
         this.date = date;
@@ -61,7 +61,6 @@ public class Report implements Serializable {
     public void setId(long id) {
         this.id = id;
     }
-
     public void setReportType(ReportType reportType) {
         this.reportType = reportType;
     }

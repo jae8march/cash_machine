@@ -1,6 +1,5 @@
 package com.company.app.dao.impl;
 
-import com.company.app.dao.connection.FactoryDAO;
 import com.company.app.dao.entity.User;
 import com.company.app.dao.entity.enumeration.UserRole;
 import com.company.app.dao.interfaceDao.IUserDAO;
@@ -18,22 +17,24 @@ import java.util.List;
 public class UserDAO implements IUserDAO {
     private static final Logger LOG = Logger.getLogger(UserDAO.class);
     private Connection connection;
-    private static UserDAO instance;
 
     /** Queries for working with MySQL*/
     private static final String SQL_REGISTRATION = "INSERT INTO user " +
             "(user_name, user_surname, user_login, user_password, role) VALUES (?,?,?,?,?)";
-    private static final String SQL_LOGIN = "SELECT * FROM user WHERE user_login=? AND user_password=?";
-    private static final String SQL_FIND_NAME = "SELECT user_name, user_surname FROM user  WHERE user_id=?";
-    private static final String SQL_FIND_ALL_USER = "SELECT * FROM user";
-    private static final String SQL_DELETE_USER = "DELETE FROM user WHERE user_id=?";
-    private static final String SQL_UPDATE_USER = "UPDATE user SET role = ? where user_id = ?";
 
-    public static UserDAO getInstance() {
-        if (instance == null) {
-            instance = new UserDAO();
-        }
-        return instance;
+    private static final String SQL_LOGIN = "SELECT * FROM user WHERE user_login=?";
+    private static final String SQL_GET_COUNT = "SELECT count(*) as count FROM user WHERE role=?";
+    private static final String SQL_DELETE_USER = "DELETE FROM user WHERE user_id=?";
+    private static final String SQL_UPDATE_USER = "UPDATE user SET user_name=?, user_surname=?, role=? where user_id=?";
+
+    private static final String SQL_SORT_HOW = "SELECT * FROM user ORDER BY ";
+    private static final String SQL_SORT_LIMIT = " limit ? offset ?";
+
+    private static final String SQL_FIND_CASHIER_CREATED_CHECK =
+            "SELECT count(*) as count from checks WHERE user_login=? AND checks_status='CREATED'";
+
+    public UserDAO(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -41,7 +42,6 @@ public class UserDAO implements IUserDAO {
      */
     @Override
     public boolean newObject(User entity) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_REGISTRATION)){
 
             stmt.setString(1, entity.getName());
@@ -53,22 +53,20 @@ public class UserDAO implements IUserDAO {
 
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot create row in database for entity:" + entity + e.getMessage());
             return false;
         }
         return true;
     }
 
     /**
-     * {@link IUserDAO#findUser(String, String)}
+     * {@link IUserDAO#findUser(String)}
      */
     @Override
-    public User findUser(String login, String password) {
+    public User findUser(String login) {
         User user = null;
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_LOGIN)){
             stmt.setString(1,login);
-            stmt.setString(2,password);
             ResultSet rs = stmt.executeQuery();
 
             rs.next();
@@ -77,7 +75,7 @@ public class UserDAO implements IUserDAO {
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot find entity by login:" + login + e.getMessage());
         }
         return user;
     }
@@ -87,33 +85,74 @@ public class UserDAO implements IUserDAO {
      */
     @Override
     public boolean update(User entity) {
-        long id = entity.getId();
-        String role = entity.getUserRole().toString();
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_UPDATE_USER)){
-
-            stmt.setString(1, role);
-            stmt.setLong(2, id);
+            stmt.setString(1, entity.getName());
+            stmt.setString(2, entity.getSurname());
+            stmt.setString(3, String.valueOf(entity.getUserRole()));
+            stmt.setLong(4, entity.getId());
 
             stmt.executeUpdate();
+
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("Cannot update row in table for entity:" + entity + e.getMessage());
             return false;
         }
         return true;
     }
 
     /**
-     * {@link IUserDAO#findAll()}
-     * @return
+     * {@link IUserDAO#findCount(String, String)}
      */
-    @Override
-    public List<User> findAll(){
+    public long findCount(String str, String sql){
+        if(sql.equalsIgnoreCase("role")){
+            sql=SQL_GET_COUNT;
+        } else if (sql.equalsIgnoreCase("cashier") ){
+            sql=SQL_FIND_CASHIER_CREATED_CHECK;
+        }
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, str);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getLong("count");
+            }
+
+            close(rs);
+            connection.close();
+        } catch (SQLException e) {
+            LOG.error("Cannot find count of objects:" + e.getMessage());
+            return -1;
+        }
+        return 0;
+    }
+
+    /**
+     * {@link IUserDAO#findNumberSorted(String, long, long)}
+     */
+    public List<User> findNumberSorted(String sortBy, long integer, long offset) {
         List<User> users = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
-        try (Statement stmt = connection.createStatement()){
-            ResultSet rs = stmt.executeQuery(SQL_FIND_ALL_USER);
+        if(sortBy.equalsIgnoreCase("id")){
+            sortBy = Column.USER_ID;
+        } else if(sortBy.equalsIgnoreCase("name")){
+            sortBy = Column.USER_NAME;
+        } else if(sortBy.equalsIgnoreCase("surname")){
+            sortBy = Column.USER_SURNAME;
+        } else if(sortBy.equalsIgnoreCase("login")){
+            sortBy = Column.USER_LOGIN;
+        } else if(sortBy.equalsIgnoreCase("role")){
+            sortBy = Column.USER_ROLE;
+        } else {
+            return users;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(SQL_SORT_HOW).append(sortBy).append(SQL_SORT_LIMIT);
+        try (PreparedStatement stmt = connection.prepareStatement(String.valueOf(sb))){
+            stmt.setLong(1, integer);
+            stmt.setLong(2, offset);
+
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 users.add(mapper(rs));
             }
@@ -121,50 +160,25 @@ public class UserDAO implements IUserDAO {
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot find number sorted by" + sortBy + ":" + e.getMessage());
         }
         return users;
     }
 
-    /**
-     * {@link IUserDAO#findById(long)}
-     */
-    @Override
-    public User findById(long id) {
-        User user = new User();
-        try (PreparedStatement stmt = connection.prepareStatement(SQL_FIND_NAME)){
-            stmt.setLong(1, id);
-            ResultSet rs = stmt.executeQuery();
-
-            if (!rs.next()) {
-                return null;
-            }
-
-            rs.next();
-            user = mapper(rs);
-
-            close(rs);
-            connection.close();
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return user;
-    }
 
     /**
      * {@link IDAO#deleteObject(long)}
      */
     @Override
     public boolean deleteObject(long id) {
-        ResultSet rs;
         try (PreparedStatement stmt = connection.prepareStatement(SQL_DELETE_USER)) {
             stmt.setLong(1, id);
-            rs = stmt.executeQuery();
 
-            close(rs);
+            stmt.executeUpdate();
+
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot delete object:" + e.getMessage());
             return false;
         }
         return true;
@@ -184,7 +198,7 @@ public class UserDAO implements IUserDAO {
             user.setPassword(resultSet.getString(Column.USER_PASSWORD));
             user.setUserRole(UserRole.valueOf(resultSet.getString(Column.USER_ROLE)));
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot set data to the entity:" + e.getMessage());
         }
         return user;
     }
@@ -198,7 +212,7 @@ public class UserDAO implements IUserDAO {
         try {
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOG.error("Error while closing the Connection:" + e.getMessage());
         }
     }
 
@@ -211,7 +225,7 @@ public class UserDAO implements IUserDAO {
             try {
                 rs.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the ResultSet:" + e.getMessage());
             }
         }
     }
@@ -225,7 +239,7 @@ public class UserDAO implements IUserDAO {
             try {
                 ps.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the PreparedStatement:" + e.getMessage());
             }
         }
     }
@@ -239,7 +253,7 @@ public class UserDAO implements IUserDAO {
             try {
                 st.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the Statement:" + e.getMessage());
             }
         }
     }

@@ -2,15 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%--<%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>--%>
-<c:choose>
-    <c:when test="${locale == 'ru'}">
-        <fmt:setLocale value="ru"/>
-    </c:when>
-    <c:otherwise>
-        <fmt:setLocale value="en"/>
-    </c:otherwise>
-</c:choose>
+
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
@@ -19,7 +11,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>List Product</title>
+    <title><fmt:message key="user.manager.product.all.title" bundle="${title}"/></title>
 </head>
 <style>
     <%@include file='../../style/main.css' %>
@@ -37,7 +29,7 @@
     <br>
             <div class="leftNav">
                 <label class="label" for="sort"><fmt:message key="table.sort" bundle="${table}"/>: </label>
-                <form action="${pageContext.request.contextPath}/api?action=manager/listProduct" method="post">
+                <form action="${pageContext.request.contextPath}/api?action=listProduct" method="post">
                     <select size="1" name="sort" id="sort">
                         <option value="code" ><fmt:message key="table.sort.code" bundle="${table}"/></option>
                         <option value="name" ><fmt:message key="table.sort.name" bundle="${table}"/></option>
@@ -49,24 +41,26 @@
                 </form>
 
                     <br>
-                    <form name="newProduct" action="${pageContext.request.contextPath}/jsp/product/newProduct.jsp" method="post">
+                    <form name="newProduct" action="${pageContext.request.contextPath}/api?action=newProduct" method="post">
                         <button type="submit" name="submit"><fmt:message key="button.manager.product.new" bundle="${buttons}"/></button>
                     </form>
-
-                <form action="${pageContext.request.contextPath}/api?action=manager/listProduct" method="post">
+                <form action="${pageContext.request.contextPath}/api?action=listProduct" method="post">
                     <c:if test="${page > 1}">
                         <button class="inside"  type="submit" name="nextPage" value='previous'>
-                            « Previous
+                            « <fmt:message key="button.navigation.previous" bundle="${buttons}"/>
                         </button>
                     </c:if>
                     <c:if test="${page < lastPage}">
                         <button class="inside"  type="submit" name="nextPage" value='next'>
-                            Next »
+                            <fmt:message key="button.navigation.next" bundle="${buttons}"/> »
                         </button>
                     </c:if>
                     <input type="hidden" name = "page" value="${page}">
                     <input type="hidden" name = "sort" value="${sort}">
                 </form>
+                <c:if test="${not empty requestScope.product_exist_in_created_check_error}">
+                    <div class="error"><fmt:message key="error.delete.product.in.created.check" bundle="${errors}"/></div>
+                </c:if>
             </div>
 
 <table>
@@ -82,13 +76,20 @@
     <tr>
         <td><c:out value="${product.code}"/></td>
         <td><c:out value="${product.name}"/></td>
-        <td><c:out value="${product.price}"/></td>
+        <td><fmt:formatNumber type="number" maxFractionDigits="2" value="${product.price}"/></td>
         <td><c:out value="${product.quantity}"/></td>
-        <td><c:out value="${product.weight}"/></td>
-        <td><c:out value="${product.weightSold}"/></td>
+        <td><fmt:formatNumber type="number" maxFractionDigits="2" value="${product.weight}"/></td>
         <td>
-            <form name="deleteProduct" action="${pageContext.request.contextPath}/api?action=manager/deleteProduct" method="post">
-                <button name = "deleteCode" value="${product.code}" class="inside" type="submit">Delete</button>
+            <c:choose>
+                <c:when test="${product.weightSold && true}">+</c:when>
+                <c:otherwise>-</c:otherwise>
+            </c:choose>
+        </td>
+        <td>
+            <form name="deleteProduct" action="${pageContext.request.contextPath}/api?action=deleteProduct" method="post">
+                <button name = "deleteCode" value="${product.code}" class="inside" type="submit">
+                    <fmt:message key="button.table.delete" bundle="${buttons}"/>
+                </button>
             </form>
         </td>
     </tr>

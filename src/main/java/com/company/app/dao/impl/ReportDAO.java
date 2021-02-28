@@ -1,6 +1,5 @@
 package com.company.app.dao.impl;
-//TODO WORK
-import com.company.app.dao.connection.FactoryDAO;
+
 import com.company.app.dao.entity.Report;
 import com.company.app.dao.entity.enumeration.ReportType;
 import com.company.app.dao.interfaceDao.IDAO;
@@ -12,24 +11,22 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Extending class ReportDAO for working with a table 'report'.
+ */
 public class ReportDAO implements IReportDAO {
     private static final Logger LOG = Logger.getLogger(ReportDAO.class);
     private Connection connection;
-    private static ReportDAO instance;
 
     /** Queries for working with MySQL*/
     private static final String SQL_CREATE_REPORT = "INSERT INTO report " +
-            "(report_date, report_cash_before, report_cash_after, report_total, report_type) VALUES (?,?,?,?,?)";
-    private static final String SQL_FIND_ALL = "SELECT * FROM report";
+            "(report_type, report_date, report_cash_before, report_cash_after, report_total) VALUES (?,?,?,?,?)";
     private static final String SQL_DELETE_REPORT = "DELETE FROM report WHERE report_id=?";
-    private static final String SQL_REPORT_DATA_TYPE = "SELECT * FROM report where DATE(?) and report_type=?";
-    private static final String SQL_REPORT_DATA_TODAY = "SELECT * FROM checks WHERE DATE(?);";
+    private static final String SQL_REPORT_DATA_TYPE = "SELECT * FROM report where DATE(report_date) = ? AND report_type=?";
+    private static final String SQL_REPORT_DATA_TODAY = "SELECT count(*) AS count FROM report WHERE DATE(report_date) = ? AND report_type='Z'";
 
-    public static ReportDAO getInstance() {
-        if (instance == null) {
-            instance = new ReportDAO();
-        }
-        return instance;
+    public ReportDAO(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -37,14 +34,14 @@ public class ReportDAO implements IReportDAO {
      */
     @Override
     public boolean newObject(Report entity) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_CREATE_REPORT)){
 
-            stmt.setTimestamp(1, entity.getDate());
-            stmt.setDouble(2, entity.getBeforeCash());
-            stmt.setDouble(3, entity.getNowCash());
-            stmt.setDouble(4, entity.getTotalCash());
-            stmt.setString(5, String.valueOf(entity.getReportType()));
+            stmt.setString(1, String.valueOf(entity.getReportType()));
+            stmt.setTimestamp(2, entity.getDate());
+            stmt.setDouble(3, entity.getBeforeCash());
+            stmt.setDouble(4, entity.getNowCash());
+            stmt.setDouble(5, entity.getTotalCash());
+
             stmt.executeUpdate();
             connection.close();
         } catch (SQLException e) {
@@ -54,28 +51,27 @@ public class ReportDAO implements IReportDAO {
         return true;
     }
 
-    public List<Report> findAllReportsTypeByData(Timestamp date) {
-        List<Report> reports = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
+    public long findAllZReportsTypeByData(Date date) {
         try (PreparedStatement stmt = connection.prepareStatement(SQL_REPORT_DATA_TODAY)){
-            stmt.setTimestamp(1, date);
+            stmt.setDate(1, date);
+
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
-                reports.add(mapper(rs));
+            if (rs.next()) {
+                return rs.getLong("count");
             }
 
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            return -1;
         }
-        return reports;
+        return 0;
     }
 
+    @Override
     public List<Report> findAllReportsTypeByDataByType(Date date, String type) {
         List<Report> reports = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_REPORT_DATA_TYPE)){
             stmt.setDate(1, date);
             stmt.setString(2,type);
@@ -93,10 +89,6 @@ public class ReportDAO implements IReportDAO {
         return reports;
     }
 
-    public List<Report> findAll(){
-        return mapper(SQL_FIND_ALL);
-    }
-
     /**
      * {@link IDAO#update(Object)}
      */
@@ -110,7 +102,6 @@ public class ReportDAO implements IReportDAO {
      */
     @Override
     public boolean deleteObject(long id) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_DELETE_REPORT)){
             stmt.setLong(1, id);
 
@@ -121,25 +112,6 @@ public class ReportDAO implements IReportDAO {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public List<Report> mapper(String sql){
-        List<Report> reports = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
-        try (Statement stmt = connection.createStatement()){
-
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                reports.add(mapper(rs));
-            }
-
-            close(rs);
-            connection.close();
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return reports;
     }
 
     /**
@@ -170,7 +142,7 @@ public class ReportDAO implements IReportDAO {
         try {
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOG.error(e.getMessage());
         }
     }
 

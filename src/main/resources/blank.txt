@@ -1,3 +1,0 @@
-Date dateNow = new Date();
-SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-
-System.out.println("Текущая дата " + formatForDateNow.format(dateNow));

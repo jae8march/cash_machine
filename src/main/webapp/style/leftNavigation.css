@@ -1,17 +1,14 @@
-
-/*div {*/
-/*    outline: 1px solid red;*/
-/*}*/
 /* Left Navigation style */
 .leftNav
 {
     text-align: center;
-    width: 25%;/*30*/
+    width: 25%;
     height: 60%;
     float: left;
     font-size: 18px;
 }
-/* Select style*/
+
+/* Select style */
 select {
     border: 2px solid #5B5B5B;
     border-radius: 10px;
@@ -31,11 +28,14 @@ option{
     color:#fff;
     background:#5B5B5B;
 }
+
+/* Report style */
 .report div {
     padding: 20px 0;
     border-bottom: 2px solid rgba(0,0,0,.05);
     text-align: center;
 }
+
 .report h1 {
     font-size: 30px;
     letter-spacing: 1px;
@@ -44,21 +44,15 @@ option{
     position: relative;
     display: inline-block;
 }
+
 .d1 h1 {
     text-align: left;
     padding: 0 0 6px 10px;
     border-left: 15px solid #64b0a8;
     border-bottom: 5px solid #64b0a8;
 }
+
 .report li{
     font-size: 20px;
     list-style-type: none;
 }
-/*body{*/
-/*    background: #C76637;*/
-/*    box-shadow: #3a2f28;*/
-/*    color: #252b31;*/
-/*    background-color: #64b0a8;*/
-/*    color: white;*/
-/*    background-color: #99bfb5;*/
-/*}*/

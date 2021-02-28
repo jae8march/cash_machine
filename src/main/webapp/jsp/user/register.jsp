@@ -1,23 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<c:choose>
-    <c:when test="${locale == 'ru'}">
-        <fmt:setLocale value="ru"/>
-    </c:when>
-    <c:otherwise>
-        <fmt:setLocale value="en"/>
-    </c:otherwise>
-</c:choose>
+<%@ page isELIgnored="false" %>
+<%@ page session="true" %>
+
+<fmt:setLocale value="${cookie['lang'].value}"/>
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
 <fmt:setBundle basename="errors" var="errors"/>
-<html>
+<html lang="${cookie['lang'].value}">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title><fmt:message key="register.title" bundle="${title}"/></title>
-    <script src="../../js/password.js"></script>
 </head>
 <style>
     <%@include file='../../style/main.css' %>
@@ -27,11 +21,19 @@
 <body>
     <ul class="menul">
         <li><a href="${pageContext.request.contextPath}"><fmt:message key="menu.main" bundle="${buttons}"/></a></li>
-        <li><a href="${pageContext.request.contextPath}/jsp/user/login.jsp"><fmt:message key="menu.sign" bundle="${buttons}"/></a></li>
+        <li><a href="${pageContext.request.contextPath}/api?action=loginPage"><fmt:message key="menu.sign" bundle="${buttons}"/></a></li>
     </ul>
     <ul class="menur">
-        <li><fmt:message key="lang.ru" bundle="${buttons}"/></li>
-        <li><fmt:message key="lang.en" bundle="${buttons}"/></li>
+        <li>
+            <a href="cookieLocale=en">
+                <fmt:message key="lang.en" bundle="${buttons}"/>
+            </a>
+        </li>
+        <li>
+            <a href="cookieLocale=ru">
+                <fmt:message key="lang.ru" bundle="${buttons}"/>
+            </a>
+        </li>
     </ul>
     <br>
 
@@ -81,15 +83,13 @@
                             <c:if test="${not empty requestScope.password_length_error_message}">
                                 <div class="error"><fmt:message key="error.length.password" bundle="${errors}"/></div>
                             </c:if>
-                            <p for="show"><fmt:message key="register.form.password.show" bundle="${inscription}"/>
-                                <input type="checkbox" onclick="password()" id="show">
-                            </p>
                         </li>
                         <li>
                             <label for="role"><fmt:message key="register.form.role" bundle="${inscription}"/>: </label>
 
                             <select size="1" name="role" id="role">
                                 <option value="MANAGER"><fmt:message key="register.form.role.option.manager" bundle="${inscription}"/></option>
+                                <option value="ADMIN"><fmt:message key="register.form.role.option.admin" bundle="${inscription}"/></option>
                                 <option value="CASHIER"><fmt:message key="register.form.role.option.cashier" bundle="${inscription}"/></option>
                                 <option value="CHIEF_CASHIER"><fmt:message key="register.form.role.option.cashier.chief" bundle="${inscription}"/></option>
                             </select>

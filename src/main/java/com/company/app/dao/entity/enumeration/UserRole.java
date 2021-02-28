@@ -6,5 +6,7 @@ public enum UserRole {
     CASHIER,
     CHIEF_CASHIER,
     MANAGER,
-    CLIENT
+    ADMIN,
+    CLIENT,
+    UNKNOWN
 }

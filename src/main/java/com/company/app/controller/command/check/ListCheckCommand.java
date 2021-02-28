@@ -1,89 +1,60 @@
 package com.company.app.controller.command.check;
-//TODO WORK
+
 import com.company.app.controller.command.ICommand;
 import com.company.app.dao.entity.Check;
+import com.company.app.dao.entity.User;
 import com.company.app.service.impl.CheckService;
+import com.company.app.util.Pagination;
 import com.company.app.util.constant.Path;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 public class ListCheckCommand implements ICommand {
     private static final Logger LOG = Logger.getLogger(ListCheckCommand.class);
-    private CheckService checkService;
-    private final int ROWS_ON_PAGE = 7;
+    private final CheckService checkService;
 
     public ListCheckCommand(CheckService checkService) {
         this.checkService = checkService;
     }
 
+    /**
+     * Lists checks in the specified sorting. If the user's role is cashier, the list of his checks.
+     * @param request request to read the command from
+     * @param response
+     */
     @Override
-    public String execute(HttpServletRequest request, HttpServletResponse response) {
-        long page, checkAmount, nextPage, lastPage;
+    public void execute(HttpServletRequest request, HttpServletResponse response) {
+        User user = (User) request.getSession().getAttribute("user");
         String sortBy = request.getParameter("sort");
 
         if (sortBy == null || sortBy.equals("")) {
             sortBy = "status";
         }
 
-        String pageString = request.getParameter("page");
+        long page = Pagination.getPage(request.getParameter("page"));
+        long nextPage = Pagination.getNextPage(request.getParameter("nextPage"), page);
 
-        if (pageString == null || pageString.isEmpty()) {
-            page = 1;
-        } else {
-            page = Long.parseLong(pageString);
-        }
-
-        String nextPageString = request.getParameter("nextPage");
-        if ("previous".equals(nextPageString)) {
-            nextPage = page - 1;
-        } else if ("next".equals(nextPageString)) {
-            nextPage = page + 1;
-        } else {
-            nextPage = page;
-        }
         page = nextPage;
 
-        try {
-            checkAmount = checkService.getCheckCount();
-        } catch (Exception e) {
-            try {
-                request.getServletContext().getRequestDispatcher(Path.ALL_CHECKS).forward(request, response);
-            } catch (ServletException | IOException servletException) {
-                servletException.printStackTrace();
-            }
-            return Path.ALL_CHECKS;
+        long count = checkService.getCheckCount();
+        long lastPage = count / Pagination.ROWS + ((count % Pagination.ROWS) == 0 ? 0 : 1);
+
+        long offset = Pagination.getOffset(lastPage, page);
+
+        if(lastPage < page){
+            page = lastPage;
         }
 
-        lastPage = checkAmount / ROWS_ON_PAGE + ((checkAmount % ROWS_ON_PAGE) == 0 ? 0 : 1);
+        List<Check> checks = checkService.getCheckSorted(sortBy, Pagination.ROWS, offset, user);
+        LOG.info("Found all checks sorted and with a limit");
+        request.setAttribute("sort", sortBy);
+        request.setAttribute("checks", checks);
+        request.setAttribute("page", page);
+        request.setAttribute("lastPage", lastPage);
 
-        List<Check> checks;
-        try {
-            if (lastPage > page) {
-                Long offset = (page - 1) * ROWS_ON_PAGE;
-                checks = checkService.getCheckSorted(sortBy, ROWS_ON_PAGE, offset);
-            } else {
-                Long offset = (lastPage - 1) * ROWS_ON_PAGE;
-                checks = checkService.getCheckSorted(sortBy, ROWS_ON_PAGE, offset);
-                page = lastPage;
-            }
-            request.setAttribute("sort", sortBy);
-            request.setAttribute("checks", checks);
-            request.setAttribute("page", page);
-            request.setAttribute("lastPage", lastPage);
-        }
-        catch (Exception e){
-            LOG.error(e.getMessage());
-        }
-        try {
-            request.getServletContext().getRequestDispatcher(Path.ALL_CHECKS).forward(request, response);
-        } catch (ServletException | IOException e) {
-            LOG.error(e.getMessage());
-        }
-        return Path.ALL_CHECKS;
+        forward(request, response, Path.ALL_CHECKS);
     }
 }

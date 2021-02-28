@@ -4,6 +4,8 @@ package com.company.app.util.constant;
  * Column names from tables.
  */
 public final class Column {
+    private  Column() { }
+
     /** Table 'user' */
     public static final String USER_ID = "user_id";
     public static final String USER_NAME = "user_name";
@@ -36,7 +38,7 @@ public final class Column {
     public static final String REPORT_ID = "report_id";
     public static final String REPORT_TYPE = "report_type";
     public static final String REPORT_DATA = "report_date";
-    public static final String REPORT_BEFORE = "report_before";
-    public static final String REPORT_AFTER = "report_after";
+    public static final String REPORT_BEFORE = "report_cash_before";
+    public static final String REPORT_AFTER = "report_cash_after";
     public static final String REPORT_TOTAL = "report_total";
 }

@@ -1,28 +1,33 @@
 package com.company.app.dao.interfaceDao;
-//TODO WORK
-import com.company.app.dao.entity.User;
 
+import com.company.app.dao.entity.User;
 import java.util.List;
 
+/**
+ * Interface for DAO, user entity.
+ */
 public interface IUserDAO extends IDAO<User> {
     /**
      * Finds user in the database by login and form.
      * @param login
-     * @param password
      * @return user
      */
-    User findUser(String login, String password);
+    User findUser(String login);
 
     /**
-     * Finds user in the database by id.
-     * @param id
-     * @return user
+     * Finds the number of rows.
+     * @param str for sql request
+     * @param sql the amount to be counted
+     * @return
      */
-    User findById(long id);
+    long findCount(String str, String sql);
 
     /**
-     * Finds all users in the database
-     * @return hashset of users
+     * Finds the number of rows in a table with a limit
+     * @param sortBy
+     * @param integer
+     * @param offset
+     * @return sorted list
      */
-    List<User> findAll();
+    List<User> findNumberSorted(String sortBy, long integer, long offset);
 }

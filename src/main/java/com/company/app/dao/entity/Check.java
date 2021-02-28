@@ -17,7 +17,7 @@ public class Check implements Serializable {
     private Timestamp checkDate;
     private User user;
     private CheckStatus checkStatus;
-    private double checkPrice;
+    private transient double checkPrice;
     private List<Product> products;
     private Report report;
 

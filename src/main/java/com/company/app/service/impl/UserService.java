@@ -1,24 +1,32 @@
 package com.company.app.service.impl;
-//TODO WORK
+
 import com.company.app.dao.connection.FactoryDAO;
 import com.company.app.dao.entity.User;
 import com.company.app.dao.impl.UserDAO;
 import com.company.app.service.IUserService;
+import com.company.app.service.IService;
 import com.company.app.util.valid.Hash;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service to work with dao, user.
+ */
 public class UserService implements IUserService {
     private static final Logger LOG = Logger.getLogger(UserService.class);
-    static FactoryDAO factory = FactoryDAO.getInstance();
+    FactoryDAO factory = FactoryDAO.getInstance();
 
+    /**
+     * {@link IService#create(Object)}
+     */
     @Override
-    public boolean create(User user) {
-//        user.setPassword(Hash.hashString(user.getPassword()));
-        try (UserDAO userDAO = factory.getUserDAO()){
-            return userDAO.newObject(user);
+    public boolean create(User entity) {
+        String hash = Hash.hashString(entity.getPassword());
+        entity.setPassword(hash);
+        try (UserDAO userDAO = factory.getUserDAO()) {
+            return userDAO.newObject(entity);
         }
         catch (Exception e) {
             LOG.error(e);
@@ -26,45 +34,56 @@ public class UserService implements IUserService {
         }
     }
 
+    /**
+     * {@link IUserService#login(String)}
+     */
     @Override
-    public User login(String login, String password) {
-        User user = new User(login, password);
+    public User login(String login) {
+        User user = new User();
         try (UserDAO userDAO = factory.getUserDAO()){
-            user = userDAO.findUser(login, password);
+            user = userDAO.findUser(login);
         } catch (Exception e) {
             LOG.error(e);
         }
         return user;
     }
 
-    @Override
-    public List<User> getAll() {
+    /**
+     * {@link IUserService#findNumberSorted(String, long, long)}
+     */
+    public List<User> findNumberSorted(String sortBy, long rows, long offset){
         List<User> users = new ArrayList<>();
         try (UserDAO userDAO = factory.getUserDAO()){
-            users = userDAO.findAll();
+            users = userDAO.findNumberSorted(sortBy, rows, offset);
         } catch (Exception e) {
             LOG.error(e);
         }
         return users;
     }
 
-    @Override
-    public void update(User user) {
-        try (UserDAO userDao = factory.getUserDAO()) {
-            userDao.update(user);
+    /**
+     * {@link IUserService#getCount(String, String)}
+     */
+    public long getCount(String str, String sql) {
+        long count = 0;
+        try (UserDAO userDAO = factory.getUserDAO()){
+            count = userDAO.findCount(str, sql);
         } catch (Exception e) {
             LOG.error(e);
         }
+        return count;
     }
 
+    /**
+     * {@link IService#delete(long)}
+     */
     @Override
     public boolean delete(long id) {
         try (UserDAO userDao = factory.getUserDAO()) {
-            userDao.deleteObject(id);
+            return userDao.deleteObject(id);
         } catch (Exception e) {
             LOG.error(e);
             return false;
         }
-         return true;
     }
 }

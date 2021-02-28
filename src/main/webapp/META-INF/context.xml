@@ -1,0 +1,11 @@
+<Context>
+	<Resource name="jdbc/project"
+		auth="Container"
+		type="javax.sql.DataSource"
+		maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+		username="root" password="root12345"
+		driverClassName="com.mysql.cj.jdbc.Driver"
+		defaultAutoCommit="true"
+		defaultTransactionIsolation="READ_COMMITTED"
+		url="jdbc:mysql://localhost:3306/cash_machine?autoReconnect=true&amp;useSSL=false"/>
+</Context>

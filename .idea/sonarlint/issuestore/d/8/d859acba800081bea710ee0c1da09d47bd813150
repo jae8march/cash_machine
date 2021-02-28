@@ -1,11 +1,9 @@
 
+X	java:S125c"<This block of commented-out lines of code should be removed.(àûøİ8Ö ±§ı.
 D
-java:S1068"'Remove this unused "LOG" private field.(ğ©¦è8ÓËïøû.
-P
-java:S1948".Make "checkService" transient or serializable.(íÂİòùÿÿÿÿ8ÓËïøû.
+java:S1068"'Remove this unused "LOG" private field.(ğ©¦è8ÓËïøû.
+X	java:S125!"<This block of commented-out lines of code should be removed.(ƒû¤ 8Ö ±§ı.
 M
-java:S1948"0Make "productService" transient or serializable.(ô‚îŸ8ÓËïøû.
-Q
-java:S1172b"/Remove this unused method parameter "response".(Ê˜ÔÌıÿÿÿÿ8å˜îùû.
-L
-java:S1172U"/Remove this unused method parameter "response".(¬º÷­8Œõçùû.
+java:S1948"0Make "productService" transient or serializable.(³’é…8­–çÉı.
+P
+java:S1948".Make "checkService" transient or serializable.(ğÚÙÊşÿÿÿÿ8­–çÉı.

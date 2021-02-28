@@ -8,31 +8,34 @@ import com.company.app.util.valid.Validator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class FindReportCommand implements ICommand {
-    private ReportService reportService;
+    private final ReportService reportService;
 
     public FindReportCommand(ReportService reportService) {
         this.reportService = reportService;
     }
 
+    /**
+     * Find all report in the specified date and type.
+     * @param request request to read the command from
+     * @param response
+     */
     @Override
-    public String execute(HttpServletRequest request, HttpServletResponse response) {
+    public void execute(HttpServletRequest request, HttpServletResponse response) {
         String date = request.getParameter("date");
         String type = request.getParameter("type");
+
         if(Validator.isValidNull(date) || Validator.isLegalDate(date)){
-            return Path.CHIEF_CASHIER;
+            request.setAttribute("incorrect_date", "error");
+            forward(request, response, Path.C_LIST_REPORT);
         }
 
         List<Report> reports = reportService.getAllReportsTypeByDataByType(date,type);
 
         request.setAttribute("reports", reports);
         request.setAttribute("reportType", type);
-
-        return Path.REPORT;
+        forward(request, response, Path.C_LIST_REPORT);
     }
 }

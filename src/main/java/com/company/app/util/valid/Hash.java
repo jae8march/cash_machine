@@ -1,12 +1,14 @@
 package com.company.app.util.valid;
-//TODO WORK
+
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Class for hashing and validation form.
  */
 public class Hash {
-    private static final int STEP = 30;
+    private static final int STEP = 12;
+
+    private Hash() { }
 
     /**
      * Evaluates hash of the given string.

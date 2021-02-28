@@ -1,12 +1,11 @@
 package com.company.app.dao.impl;
 
-import com.company.app.dao.connection.FactoryDAO;
 import com.company.app.dao.entity.Product;
 import com.company.app.dao.interfaceDao.IProductDAO;
 import com.company.app.dao.interfaceDao.IDAO;
 import com.company.app.util.constant.Column;
 import org.apache.log4j.Logger;
-//TODO WORK
+
 import java.sql.*;
 import java.util.*;
 
@@ -16,31 +15,24 @@ import java.util.*;
 public class ProductDAO implements IProductDAO {
     private static final Logger LOG = Logger.getLogger(ProductDAO.class);
     private Connection connection;
-    private static ProductDAO instance;
 
     /** Queries for working with MySQL*/
     private static final String SQL_ADD_NEW_PRODUCT = "INSERT INTO product " +
             "(product_code, product_name, product_price, product_quantity, product_weight, product_weightSold) " +
             "VALUES (?,?,?,?,?,?)";
-    private static final String SQL_FIND_ALL_PRODUCT = "SELECT * FROM product";
+
     private static final String SQL_FIND_BY_NAME = "SELECT * FROM product WHERE product_name=?";
     private static final String SQL_FIND_BY_CODE = "SELECT * FROM product WHERE product_code=?";
     private static final String SQL_DELETE_BY_CODE = "DELETE FROM product WHERE product_code =?";
     private static final String SQL_UPDATE = "UPDATE product SET product_quantity=?, product_weight =? where product_code = ?";
 
+    private static final String SQL_SORT_HOW = "SELECT * FROM product ORDER BY ";
+    private static final String SQL_SORT_LIMIT = " limit ? offset ?";
 
-    private static final String SQL_SORT = " SELECT * FROM product ORDER BY ?";
-    private static final String SQL_SORT_CODE = " SELECT * FROM product ORDER BY product_code+0 limit ? offset ?";
-    private static final String SQL_SORT_NAME = " SELECT * FROM product ORDER BY product_name limit ? offset ?";
-    private static final String SQL_SORT_PRICE = " SELECT * FROM product ORDER BY product_price+0 limit ? offset ?";
-    private static final String SQL_SORT_QUANTITY = " SELECT * FROM product ORDER BY product_quantity+0 limit ? offset ?";
-    private static final String SQL_SORT_WEIGHT = " SELECT * FROM product ORDER BY product_weight+0 limit ? offset ?";
+    private static final String SQL_CREATED_CHECKS_AND_PRODUCT = "SELECT * FROM product_check INNER JOIN checks c on product_check.checks_id = c.checks_id AND product_code=? AND checks_status='CREATED';";
 
-    public static ProductDAO getInstance() {
-        if (instance == null) {
-            instance = new ProductDAO();
-        }
-        return instance;
+    public ProductDAO(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -48,7 +40,6 @@ public class ProductDAO implements IProductDAO {
      */
     @Override
     public boolean newObject(Product entity) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_ADD_NEW_PRODUCT)){
             stmt.setLong(1, entity.getCode());
             stmt.setString(2, entity.getName());
@@ -60,7 +51,7 @@ public class ProductDAO implements IProductDAO {
             stmt.executeUpdate();
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot create row in database for entity:" + entity + e.getMessage());
             return false;
         }
         return true;
@@ -71,7 +62,6 @@ public class ProductDAO implements IProductDAO {
      */
     @Override
     public boolean update(Product entity) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_UPDATE)){
             stmt.setLong(1, entity.getQuantity());
             stmt.setDouble(2, entity.getWeight());
@@ -80,16 +70,43 @@ public class ProductDAO implements IProductDAO {
             stmt.executeUpdate();
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot update row in table for entity:" + entity + e.getMessage());
             return false;
         }
         return true;
     }
 
+    /**
+     * {@link IProductDAO#findProductInChecks(long)}
+     */
+    @Override
+    public boolean findProductInChecks(long id) {
+        Product product;
+        try (PreparedStatement stmt = connection.prepareStatement(SQL_CREATED_CHECKS_AND_PRODUCT)){
+            stmt.setLong(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            rs.next();
+            product = mapper(rs);
+
+            close(rs);
+            connection.close();
+            if(product.getName()!=null){
+                return true;
+            }
+        } catch (SQLException e) {
+            LOG.error("Cannot delete product in chek where code product:" + id + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * {@link IProductDAO#findProductName(String)}
+     */
     @Override
     public Product findProductName(String name) {
         Product product = new Product();
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_FIND_BY_NAME)){
             stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
@@ -100,38 +117,19 @@ public class ProductDAO implements IProductDAO {
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot find entity by name:" + name + e.getMessage());
         }
         return product;
     }
 
+    /**
+     * {@link IProductDAO#findById(long)}
+     */
     @Override
-    public List<Product> findAll() {
-        List<Product> products = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
-        try (Statement stmt = connection.createStatement()){
-            ResultSet rs = stmt.executeQuery(SQL_FIND_ALL_PRODUCT);
-
-            while (rs.next()) {
-                Product product;
-                product = mapper(rs);
-                products.add(product);
-            }
-
-            close(rs);
-            connection.close();
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return products;
-    }
-
-    @Override
-    public Product findById(long id) {
+    public Product findById(long code) {
         Product product = new Product();
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_FIND_BY_CODE)){
-            stmt.setLong(1, id);
+            stmt.setLong(1, code);
             ResultSet rs = stmt.executeQuery();
 
             rs.next();
@@ -140,7 +138,7 @@ public class ProductDAO implements IProductDAO {
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot find entity by id:" + code + e.getMessage());
         }
         return product;
     }
@@ -150,11 +148,6 @@ public class ProductDAO implements IProductDAO {
      */
     @Override
     public boolean deleteObject(long id) {
-        return false;
-    }
-
-    public boolean deleteProduct(long id) {
-        connection = FactoryDAO.getConnection();
         try (PreparedStatement stmt = connection.prepareStatement(SQL_DELETE_BY_CODE)){
             stmt.setLong(1, id);
 
@@ -162,50 +155,26 @@ public class ProductDAO implements IProductDAO {
 
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot delete object:" + e.getMessage());
             return false;
         }
         return true;
     }
 
-    @Override
-    public List<Product> findAllSorted(String sortBy) {
-        List<Product> products = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
-        try (PreparedStatement stmt = connection.prepareStatement(SQL_SORT)){
-            stmt.setString(1, sortBy);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                products.add(mapper(rs));
-            }
-            close(rs);
-            connection.close();
-        } catch (SQLException e) {
-            LOG.error(e.getMessage());
-        }
-        return products;
-    }
-
+    /**
+     * {@link IProductDAO#findNumberSorted(String, long, long)}
+     * @param sortBy
+     * @param integer
+     * @param offset
+     * @return
+     */
     @Override
     public List<Product> findNumberSorted(String sortBy, long integer, long offset) {
         List<Product> products = new ArrayList<>();
-        connection = FactoryDAO.getConnection();
-        try{
-            PreparedStatement stmt;
-            if(sortBy.equalsIgnoreCase("code")){
-                stmt = connection.prepareStatement(SQL_SORT_CODE);
-            } else if(sortBy.equalsIgnoreCase("name")){
-                stmt = connection.prepareStatement(SQL_SORT_NAME);
-            } else if(sortBy.equalsIgnoreCase("price")){
-                stmt = connection.prepareStatement(SQL_SORT_PRICE);
-            } else if(sortBy.equalsIgnoreCase("quantity")){
-                stmt = connection.prepareStatement(SQL_SORT_QUANTITY);
-            } else if(sortBy.equalsIgnoreCase("weight")){
-                stmt = connection.prepareStatement(SQL_SORT_WEIGHT);
-            } else {
-                return products;
-            }
+        sortBy = getTypeSort(sortBy);
+        StringBuilder sb = new StringBuilder();
+        sb.append(SQL_SORT_HOW).append(sortBy).append(SQL_SORT_LIMIT);
+        try (PreparedStatement stmt = connection.prepareStatement(String.valueOf(sb))){
             stmt.setLong(1, integer);
             stmt.setLong(2, offset);
 
@@ -217,9 +186,30 @@ public class ProductDAO implements IProductDAO {
             close(rs);
             connection.close();
         } catch (SQLException e) {
-            LOG.error(e);
+            LOG.error("Cannot find number sorted by" + sortBy + ":" + e.getMessage());
         }
         return products;
+    }
+
+    /**
+     * Checks what type of sort to use.
+     * @param sortBy
+     * @return
+     */
+    private String getTypeSort(String sortBy){
+        if(sortBy.equalsIgnoreCase("code")){
+            return Column.PRODUCT_CODE;
+        } else if(sortBy.equalsIgnoreCase("name")){
+            return Column.PRODUCT_NAME;
+        } else if(sortBy.equalsIgnoreCase("price")){
+            return Column.PRODUCT_PRICE;
+        } else if(sortBy.equalsIgnoreCase("quantity")){
+            return Column.PRODUCT_QUANTITY;
+        } else if(sortBy.equalsIgnoreCase("weight")) {
+            return Column.PRODUCT_WEIGHT;
+        } else {
+            return Column.PRODUCT_CODE;
+        }
     }
 
     /**
@@ -236,7 +226,7 @@ public class ProductDAO implements IProductDAO {
         product.setWeight(resultSet.getDouble(Column.PRODUCT_WEIGHT));
         product.setWeightSold(resultSet.getBoolean(Column.PRODUCT_HOW_SOLD));
         } catch (SQLException e) {
-            LOG.error(e.getMessage());
+            LOG.error("Cannot set data to the entity:" + e.getMessage());
         }
         return product;
     }
@@ -250,7 +240,7 @@ public class ProductDAO implements IProductDAO {
         try {
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOG.error("Error while closing the Connection:" + e.getMessage());
         }
     }
 
@@ -263,7 +253,7 @@ public class ProductDAO implements IProductDAO {
             try {
                 rs.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the ResultSet:" + e.getMessage());
             }
         }
     }
@@ -277,7 +267,7 @@ public class ProductDAO implements IProductDAO {
             try {
                 ps.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the PreparedStatement:" + e.getMessage());
             }
         }
     }
@@ -291,7 +281,7 @@ public class ProductDAO implements IProductDAO {
             try {
                 st.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage());
+                LOG.error("Error while closing the Statement:" + e.getMessage());
             }
         }
     }
