@@ -1,16 +1,0 @@
-
-T
-java:S1135"2Complete the task associated to this TODO comment.(¥Ü‡£üÿÿÿÿ8”õ¼Øû.
-X
-java:S1128";Remove this unused import 'javax.servlet.ServletException'.(Š‰™Œ8œ¢Çü.
-W	java:S1250"<This block of commented-out lines of code should be removed.(ĞŠë8œ¢Çü.
-I
-java:S1068"'Remove this unused "LOG" private field.(ÿ¿›üÿÿÿÿ8î“Ããú.
-R
-java:S1128"0Remove this unused import 'java.io.IOException'.(ªº»Úıÿÿÿÿ8œ¢Çü.
-H
-java:S1128"+Remove this unused import 'java.util.Date'.(¸…¼ü8œ¢Çü.
-Q
-java:S1948"/Make "reportService" transient or serializable.(åî– ûÿÿÿÿ8ÌæäÉı.
-P
-java:S1948".Make "checkService" transient or serializable.(ğÚÙÊşÿÿÿÿ8ÌæäÉı.
