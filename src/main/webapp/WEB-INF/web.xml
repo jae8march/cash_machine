@@ -26,17 +26,7 @@
         <servlet-name>Main</servlet-name>
         <url-pattern>/api/*</url-pattern>
     </filter-mapping>
-
-    <filter>
-        <filter-name>CookieLocaleFilter</filter-name>
-        <filter-class>com.company.app.util.filter.CookieLocaleFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>CookieLocaleFilter</filter-name>
-        <servlet-name>Main</servlet-name>
-<!--        <url-pattern>/api/*</url-pattern>-->
-    </filter-mapping>
-
+    
     <filter>
         <filter-name>AccessFilter</filter-name>
         <filter-class>com.company.app.util.filter.AccessFilter</filter-class>
@@ -55,4 +45,8 @@
         <filter-name>jspFilter</filter-name>
         <url-pattern>/jsp/*</url-pattern>
     </filter-mapping>
+
+    <listener>
+        <listener-class>com.company.app.util.listener.SessionListener</listener-class>
+    </listener>
 </web-app>
