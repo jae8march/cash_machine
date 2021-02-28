@@ -1,15 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ page isELIgnored="false" %>
-<%@ page session="true" %>
 
-<fmt:setLocale value="${cookie['lang'].value}"/>
 <fmt:setBundle basename="buttons" var="buttons"/>
 <fmt:setBundle basename="title" var="title"/>
 <fmt:setBundle basename="inscription" var="inscription"/>
 <fmt:setBundle basename="errors" var="errors"/>
-<html lang="${cookie['lang'].value}">
+<html>
 <head>
     <title><fmt:message key="register.title" bundle="${title}"/></title>
 </head>
